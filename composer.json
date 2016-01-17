@@ -1,0 +1,21 @@
+{
+    "name": "alex/arquivo",
+    "description": "Biblioteca para gerenciar arquivos",
+    "type": "lib",
+    "authors": [
+        {
+            "name": "Alex Moreno",
+            "email": "alex.moreno.costa@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Alex\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "^5.1"
+    }
+}
