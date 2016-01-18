@@ -7,87 +7,70 @@ namespace Alex\Entidade;
  *
  * @author alex
  */
-class Arquivo
+class Arquivo extends \SplFileInfo
 {
-    protected $nome;
-    protected $tamanho;
-    protected $extensao;
     protected $mimeType;
-    protected $nomeBase;
-    protected $diretorio;
-    protected $caminhoCompleto;
     
-    public function __construct($arquivo)
+    public function __construct($filename)
     {
-        if (!is_file($arquivo)) {
-            throw new \InvalidArgumentException('O caminho informado (%s) não é um arquivo valido', $arquivo);
+        parent::__construct($filename);
+        
+        if (!$this->isFile()) {
+            throw new \InvalidArgumentException(sprintf('The given path %s is not a valid file', $filename));
         }
         
-        $this->desmembrarArquivo($arquivo);
+        $this->dismemberFile($filename);
     }
     
-    protected function desmembrarArquivo($arquivo)
+    protected function dismemberFile($filename)
     {
-        $pathinfo = pathinfo($arquivo);
-        $this->nome = $pathinfo['filename'];
-        $this->extensao = $pathinfo['extension'];
-        $this->nomeBase = $pathinfo['basename'];
-        $this->diretorio = $pathinfo['dirname'];
-        $this->tamanho = filesize($arquivo);
-        $this->mimeType = mime_content_type($arquivo);
-        $this->caminhoCompleto = realpath($arquivo);
+        $this->mimeType = mime_content_type($filename);
     }
     
-    public function getNome()
-    {
-        return $this->nome;
-    }
-
-    public function getTamanho()
-    {
-        return $this->tamanho;
-    }
-
-    public function getExtensao()
-    {
-        return $this->extensao;
-    }
-
     public function getMimeType()
     {
         return $this->mimeType;
     }
 
-    public function getNomeBase()
+    public function getFilename()
     {
-        return $this->nomeBase;
-    }
-
-    public function getDiretorio()
-    {
-        return $this->diretorio;
-    }
-
-    public function getCaminhoCompleto()
-    {
-        return $this->caminhoCompleto;
+        return pathinfo($this->getRealPath(), PATHINFO_FILENAME);
     }
     
-    public function renomear($novoNome)
+    /**
+     * Rename the file and re-builds the class with the new file
+     * @param string $newName
+     * @return boolean
+     */
+    public function rename($newName)
     {
-        $this->nome = filter_var($novoNome, FILTER_SANITIZE_STRING);
-        $novoArquivo = $this->diretorio . '/' . $this->nome . '.' . $this->extensao;
-        rename($this->caminhoCompleto, $novoArquivo);
-        $this->desmembrarArquivo($novoArquivo);
+        $newName = filter_var($newName, FILTER_SANITIZE_STRING);
+        $newFile = realpath($this->getPath()) . '/' . $newName . '.' . $this->getExtension();
+        
+        if (!rename($this->getRealPath(), $newFile)) {
+            throw new \RuntimeException(sprintf('The file %s cannot be rename', $this->getRealPath()));
+        }
+        
+        $this->__construct($newFile);
         return true;
     }
     
-    public function alterarExtensao($novaExtensao)
+    /**
+     * Delete the file
+     * @return boolean
+     */
+    public function delete()
     {
-        $this->extensao = filter_var($novaExtensao, FILTER_SANITIZE_STRING);
-        $novoArquivo = $this->diretorio . '/' . $this->nome . '.' . $this->extensao;
-        rename($this->caminhoCompleto, $novoArquivo);
-        $this->desmembrarArquivo($novoArquivo);
-        return true;
+        return unlink($this->getRealPath());
+    }
+    
+    public function move($newDirectory)
+    {
+        
+    }
+    
+    public function copy($newDirectory)
+    {
+        
     }
 }
