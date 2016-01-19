@@ -40,13 +40,16 @@ class Arquivo extends \SplFileInfo
     /**
      * Rename the file and re-builds the class with the new file
      * @param string $newName
+     * @param string $newExtension
      * @return boolean
      */
-    public function rename($newName)
+    public function rename($newName, $extension = null)
     {
         $newName = filter_var($newName, FILTER_SANITIZE_STRING);
-        $newFile = realpath($this->getPath()) . '/' . $newName . '.' . $this->getExtension();
+        $newExtension = (null === $extension) ? $this->getExtension() : filter_var(substr_replace('.', null, $extension), FILTER_SANITIZE_STRING);
         
+        $newFile = realpath($this->getPath()) . '/' . $newName . '.' . $newExtension;
+
         if (!rename($this->getRealPath(), $newFile)) {
             throw new \RuntimeException(sprintf('The file %s cannot be rename', $this->getRealPath()));
         }
