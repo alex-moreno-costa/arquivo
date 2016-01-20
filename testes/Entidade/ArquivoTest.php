@@ -68,4 +68,22 @@ class ArquivoTest extends PHPUnit
         unset($file);
         $file = new Arquivo($filename);
     }
+    
+    public function testMove()
+    {
+        $filename = $this->criarArquivo('arquivo.txt');
+        $file = new Arquivo($filename);
+        $this->assertTrue($file->move(__DIR__));
+        $this->assertEquals(realpath(__DIR__), realpath($file->getPath()));
+        $this->assertTrue($file->delete());
+    }
+    
+    public function testCopy()
+    {
+        $filename = $this->criarArquivo('arquivo.txt');
+        $file = new Arquivo($filename);
+        $this->assertTrue($file->copy(__DIR__));
+        $this->assertEquals(realpath(__DIR__), realpath($file->getPath()));
+        $this->assertTrue($file->delete());
+    }
 }

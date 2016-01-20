@@ -49,13 +49,10 @@ class Arquivo extends \SplFileInfo
         $newExtension = (null === $extension) ? $this->getExtension() : filter_var(substr_replace('.', null, $extension), FILTER_SANITIZE_STRING);
         
         $newFile = realpath($this->getPath()) . '/' . $newName . '.' . $newExtension;
-
-        if (!rename($this->getRealPath(), $newFile)) {
-            throw new \RuntimeException(sprintf('The file %s cannot be rename', $this->getRealPath()));
-        }
+        $result = rename($this->getRealPath(), $newFile);
         
         $this->__construct($newFile);
-        return true;
+        return $result;
     }
     
     /**
@@ -67,13 +64,57 @@ class Arquivo extends \SplFileInfo
         return unlink($this->getRealPath());
     }
     
-    public function move($newDirectory)
+    /**
+     * Moves the file to a given directory
+     * @param string $newDirectory
+     * @param boolean $overwrite
+     * @return boolean
+     * @throws \InvalidArgumentException
+     * @throws \RunArgumentException
+     */
+    public function move($newDirectory, $overwrite = true)
     {
+        if (!is_dir($newDirectory)) {
+            throw new \InvalidArgumentException(sprintf('The given directory "%s" is invalid', $newDirectory));
+        }
         
+        $oldname = $this->getRealPath();
+        $newname = realpath($newDirectory) . '/' . $this->getFilename();
+        
+        if (is_file($newname) && $overwrite === false) {
+            throw new \RunArgumentException(sprintf('Cannot overwrite file %s', $newname));
+        }
+        
+        $result = rename($oldname, $newname);
+        $this->__construct($newname);
+        
+        return $result;
     }
     
-    public function copy($newDirectory)
+    /**
+     * Copies the file to a given directory
+     * @param string $newDirectory
+     * @param boolean $overwrite
+     * @return boolean
+     * @throws \InvalidArgumentException
+     * @throws \RunArgumentException
+     */
+    public function copy($newDirectory, $overwrite = true)
     {
+        if (!is_dir($newDirectory)) {
+            throw new \InvalidArgumentException(sprintf('The given directory "%s" is invalid', $newDirectory));
+        }
         
+        $oldname = $this->getRealPath();
+        $newname = realpath($newDirectory) . '/' . $this->getFilename();
+        
+        if (is_file($newname) && $overwrite === false) {
+            throw new \RunArgumentException(sprintf('Cannot overwrite file %s', $newname));
+        }
+        
+        $result = copy($oldname, $newname);
+        $this->__construct($newname);
+        
+        return $result;
     }
 }
